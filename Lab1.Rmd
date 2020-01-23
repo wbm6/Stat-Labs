@@ -1,0 +1,171 @@
+
+
+```{r setup, include=FALSE}
+# DO NOT ALTER CODE IN THIS CHUNK
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+```
+
+* * *
+
+## Lab report - William Marcus, Joy Reeves, Gio, Emma
+
+#### Load data:
+```{r}
+load(url("https://stat.duke.edu/~mc301/data/nycflights.RData"))
+names(nycflights)
+str(nycflights)
+```
+
+#### Exercise 1: 
+They have different x limits 
+
+
+```{r ex1}
+qplot(x = dep_delay, data = nycflights, geom = "histogram")
+
+qplot(x = dep_delay, data = nycflights, geom = "histogram", binwidth = 15)
+qplot(x = dep_delay, data = nycflights, geom = "histogram", binwidth = 150)
+      
+rdu_flights <- nycflights %>%
+  filter(dest == "RDU")
+qplot(x = dep_delay, data = rdu_flights, geom = "histogram")
+
+
+rdu_flights %>%
+  summarise(mean_dd = mean(dep_delay), sd_dd = sd(dep_delay), n = n())
+```
+
+#### Exercise 2: 
+
+
+68
+```{r ex2}
+sfo_feb_flights <- nycflights %>%
+  filter(dest == "SFO", month == 2)
+
+
+```
+
+#### Exercise 3: 
+
+
+
+```{r ex3}
+qplot(x = arr_delay, data = sfo_feb_flights, geom = "histogram")
+
+sfo_feb_flights %>%
+  summarise(mean_dd = mean(arr_delay), sd_dd = sd(arr_delay), n = n())
+```
+
+#### Exercise 4: 
+
+
+Total Median is -11
+Total IQR is 23.25
+
+EQR Median is -15.5
+JFK Median is -10.5
+
+EWR IQR is 17.5
+JFK IQR is 22.75
+
+JFK has more variable arrival delays
+```{r ex4}
+sfo_feb_flights %>%
+
+  summarise(median_sfo_febflight = median(arr_delay), iqr_sfo_febflight = IQR(arr_delay), n = n())
+sfo_feb_flights %>%
+  group_by(origin) %>%
+  summarise(median_sfo_febflight = median(arr_delay), iqr_sfo_febflight = IQR(arr_delay), n = n())
+
+```
+
+#### Exercise 5: 
+
+LGA has the highest on time departure rate
+
+```{r ex5}
+qplot(y = dep_delay, x = factor(month), data = nycflights, geom = "boxplot")
+
+nycflights <- nycflights %>%
+  mutate(dep_type = ifelse(dep_delay < 5, "on time", "delayed"))
+
+nycflights %>%
+  group_by(origin) %>%
+  summarise(ot_dep_rate = sum(dep_type == "on time") / n()) %>%
+  arrange(desc(ot_dep_rate))
+
+```
+
+#### Exercise 6: 
+
+LGA has the highest departure percentage
+
+```{r ex6}
+qplot(x = origin, fill = dep_type, data = nycflights, geom = "bar")
+
+```
+
+
+* * *
+
+### On your own:
+
+#### 1:
+
+
+
+```{r oyo1}
+nycflights <- nycflights %>%
+  mutate(avg_speed = (distance/(air_time/60)))
+```
+
+#### 2:
+
+N666DN
+
+```{r oyo2}
+nycflights %>%
+  arrange(desc(avg_speed))
+
+```
+
+#### 3:
+
+
+
+```{r oyo3}
+qplot(x = distance, y = avg_speed, data = nycflights, geom = "point", color = I("blue"))
+
+```
+
+#### 4:
+
+
+On time arrival rate was .776 for on time departures and was .18 for delayed departures.
+```{r oyo4}
+nycflights <- nycflights %>%
+  mutate(arr_type = ifelse(arr_delay <= 0, "on time", "delayed"))
+
+nycflights %>%
+  group_by(dep_type) %>%
+  summarise(ot_arr_rate = sum(arr_type == "on time") / n()) %>%
+  arrange(desc(ot_arr_rate))
+
+```
+
+#### 5:
+
+
+
+```{r oyo5}
+list_ <- c("AA", "DL", "UA")
+
+ans_flights <- filter(nycflights, carrier %in% list_)
+
+
+qplot(x = dep_delay, y = arr_delay, data = ans_flights, geom = "point", xlim = c(0,850), ylim = c(0,850), color = carrier)
+
+```
